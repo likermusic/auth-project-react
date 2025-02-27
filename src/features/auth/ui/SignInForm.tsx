@@ -16,6 +16,7 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 import { toast, Toaster } from "sonner";
+import { authApi } from "../api/auth-api";
 
 const formSchema = z.object({
   username: z.string().min(2, "Username must be at least 2 characters"),
@@ -40,6 +41,7 @@ export function SignInForm() {
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     toast("Event has been created.");
+    authApi.login(data);
   }
 
   return (
