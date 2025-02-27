@@ -1,10 +1,12 @@
 import { Button } from "@/shared/ui/button";
+import { AppRouter } from "./AppRouter";
+import { AppProvider } from "./AppProvider";
 
 function App() {
   return (
-    <Button className="m-4 cursor-pointer" size={"lg"}>
-      BUtton
-    </Button>
+    <AppProvider>
+      <AppRouter />
+    </AppProvider>
   );
 }
 
