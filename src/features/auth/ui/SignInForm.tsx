@@ -19,7 +19,7 @@ import { toast, Toaster } from "sonner";
 import { authApi } from "../api/auth-api";
 
 const formSchema = z.object({
-  username: z.string().min(2, "Username must be at least 2 characters"),
+  login: z.string().min(2, "Username must be at least 2 characters"),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -34,14 +34,15 @@ export function SignInForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      login: "",
       password: "",
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     toast("Event has been created.");
-    authApi.login(data);
+    const resp = await authApi.login(data);
+    console.log(resp);
   }
 
   return (
@@ -50,10 +51,10 @@ export function SignInForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
         <FormField
           control={form.control}
-          name="username"
+          name="login"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Login</FormLabel>
               <FormControl>
                 <Input placeholder="Login" {...field} />
               </FormControl>

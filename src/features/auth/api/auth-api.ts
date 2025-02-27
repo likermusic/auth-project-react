@@ -1,7 +1,7 @@
 import { api } from "@/shared/api/axios-instance";
 
 interface AuthData {
-  username: string;
+  login: string;
   password: string;
 }
 
