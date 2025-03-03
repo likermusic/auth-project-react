@@ -1,50 +1,37 @@
-// import React, { useState } from "react";
-// import { Button } from "@/shared/ui/button";
-// import { Eye, EyeOff } from "lucide-react"; // Импортируйте иконки глаза
+import React, { useState } from "react";
+import { Button } from "@/shared/ui/button";
+import { Eye, EyeOff } from "lucide-react"; // Импортируйте иконки глаза
+import { Toaster } from "sonner";
 
 // import { zodResolver } from "@hookform/resolvers/zod";
 // import { useForm } from "react-hook-form";
 // import { z } from "zod";
 
-// import {
-//   Form,
-//   FormControl,
-//   FormField,
-//   FormItem,
-//   FormLabel,
-//   FormMessage,
-// } from "@/shared/ui/form";
-// import { Input } from "@/shared/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/ui/form";
+import { Input } from "@/shared/ui/input";
+import { z } from "zod";
+import { UseFormReturn } from "react-hook-form";
+// import { toast, Toaster } from "sonner";
+// import { authApi } from "../api/auth-api";
 
-import { FormLayout } from "./FormLayout";
-import { useAuthForm } from "../model/useAuthForm";
-import { authApi } from "../api/auth-api";
+type FormData = z.infer<typeof formSchema>; // Тип данных формы
 
-// const formSchema = z.object({
-//   login: z.string().min(2, "Username must be at least 2 characters"),
-//   password: z
-//     .string()
-//     .min(6, "Password must be at least 6 characters")
-//     .max(20, "Password is too long")
-//     .regex(/[A-Z]/, "Пароль должен содержать хотя бы одну заглавную букву")
-//     .regex(/[0-9]/, "Пароль должен содержать хотя бы одну цифру"),
-// });
+interface FormLayoutProps {
+  form: UseFormReturn<FormData>;
+  onSubmit: (data: FormData) => void;
+}
 
-export function SignInForm() {
-  const { form, authHandler } = useAuthForm(authApi.signin);
+export function FormLayout({ form, onSubmit }: FormLayoutProps) {
+  const [showPassword, setShowPassword] = useState(false); // Состояние для переключения видимости пароля
 
-  // const [showPassword, setShowPassword] = useState(false); // Состояние для переключения видимости пароля
-
-  // const form = useForm<z.infer<typeof formSchema>>({
-  //   resolver: zodResolver(formSchema),
-  //   defaultValues: {
-  //     login: "",
-  //     password: "",
-  //   },
-  // });
-
-  return <FormLayout onSubmit={authHandler} form={form} />;
-  /*
+  return (
     <Form {...form}>
       <Toaster />
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
@@ -93,5 +80,6 @@ export function SignInForm() {
         />
         <Button type="submit">Submit</Button>
       </form>
-    </Form>*/
+    </Form>
+  );
 }
