@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
-// import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 
 const app = express();
-// const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
@@ -25,20 +25,17 @@ const formSchema = z.object({
 app.post("/api/auth/signin", async (req, resp) => {
   const result = formSchema.safeParse(req.body);
   if (!result.success) {
-    // console.log(result.error.flatten().fieldErrors);
-
-    // return resp.status(400).json({ errors: result.error.flatten() });
-    // Метод .flatten() преобразует сложный объект ошибок в более простой и удобный для использования формат.
-    // Он возвращает объект с двумя свойствами: formErrors — ошибки, связанные с формой в целом (например, если форма не прошла валидацию на уровне всей структуры).
-    // fieldErrors — ошибки, связанные с конкретными полями формы.
     return resp
       .status(400)
       .json({ errors: result.error.flatten().fieldErrors });
   } else {
-    return resp.status(200).json("ok boy");
+    const users = await prisma.user.findMany();
+    console.log(users);
+
+    // return resp.status(200).json("Signin successful");
   }
-  const { login, password } = result.body;
-  console.log(login, password);
+  // const { login, password } = result.body;
+  // console.log(login, password);
 
   // const hashedPassword = await bcrypt.hash(password, 10);
 
