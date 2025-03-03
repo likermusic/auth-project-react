@@ -45,7 +45,7 @@ app.post("/api/auth/signup", async (req, resp) => {
     // 3. Создаём нового пользователя
     const newUser = await prisma.user.create({
       data: {
-        email,
+        login,
         password: hashedPassword,
       },
     });
@@ -97,22 +97,7 @@ app.post("/api/auth/signin", async (req, resp) => {
       console.error(error);
       resp.status(500).json({ error: "Ошибка сервера" });
     }
-
-    // return resp.status(200).json("Signin successful");
   }
-  // const { login, password } = result.body;
-  // console.log(login, password);
-
-  // const hashedPassword = await bcrypt.hash(password, 10);
-
-  // try {
-  //   const user = await prisma.user.create({
-  //     data: { email, password: hashedPassword },
-  //   });
-  //   res.json(user);
-  // } catch (error) {
-  //   res.status(400).json({ message: "Email уже зарегистрирован" });
-  // }
 });
 
 app.listen(4000, () => console.log("Сервер запущен на порту 4000"));

@@ -6,7 +6,7 @@ interface AuthData {
 }
 
 export const authApi = {
-  login: (data: AuthData) => api.post("/auth/signin", data),
-  register: (data: AuthData) => api.post("/auth/signup", data),
+  signin: (data: AuthData) => api.post("/auth/signin", data),
+  signup: (data: AuthData) => api.post("/auth/signup", data),
   logout: () => api.post("/auth/logout"),
 };

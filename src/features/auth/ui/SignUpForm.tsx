@@ -28,7 +28,7 @@ const formSchema = z.object({
     .regex(/[0-9]/, "Пароль должен содержать хотя бы одну цифру"),
 });
 
-export function SignInForm() {
+export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false); // Состояние для переключения видимости пароля
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -41,7 +41,7 @@ export function SignInForm() {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     toast("Event has been created.");
-    const resp = await authApi.signin(data);
+    const resp = await authApi.signup(data);
     console.log(resp);
   }
 

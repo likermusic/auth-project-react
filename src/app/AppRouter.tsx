@@ -7,6 +7,7 @@ import { ROUTES } from "@/shared/constants/routes";
 import { Home } from "@/pages/home";
 import { SignIn } from "@/pages/sign-in";
 import { RootLayout } from "@/shared/ui/layouts/RootLayout";
+import { SignUp } from "@/pages/sign-up";
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
   {
     path: ROUTES.SIGNIN,
     element: <SignIn />,
+  },
+  {
+    path: ROUTES.SIGNUP,
+    element: <SignUp />,
   },
   // {
   //   path: ROUTES.BOARDS,
