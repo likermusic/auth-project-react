@@ -1,21 +1,10 @@
 import { api } from "@/shared/api/axios-instance";
-
-interface AuthDTO {
-  user: {
-    id: string;
-    login: string;
-  };
-  token: string;
-}
-
-interface AuthData {
-  login: string;
-  password: string;
-}
+import { FormData } from "../model/useAuthForm";
+import { AuthDTO } from "./types";
 
 interface AuthApi {
-  signin: (data: AuthData) => Promise<AuthDTO>;
-  signup: (data: AuthData) => Promise<AuthDTO>;
+  signin: (data: FormData) => Promise<AuthDTO>;
+  signup: (data: FormData) => Promise<AuthDTO>;
   logout: () => Promise<void>;
 }
 

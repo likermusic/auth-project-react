@@ -18,14 +18,20 @@ import {
 import { Input } from "@/shared/ui/input";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
+import { FormData } from "../model/useAuthForm";
 // import { toast, Toaster } from "sonner";
 // import { authApi } from "../api/auth-api";
 
-type FormData = z.infer<typeof formSchema>; // Тип данных формы
-
 interface FormLayoutProps {
-  form: UseFormReturn<FormData>;
-  onSubmit: (data: FormData) => void;
+  form: UseFormReturn<
+    {
+      login: string;
+      password: string;
+    },
+    any,
+    undefined
+  >;
+  onSubmit: (data: FormData) => Promise<void>;
 }
 
 export function FormLayout({ form, onSubmit }: FormLayoutProps) {
