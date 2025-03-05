@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { toast } from "sonner";
-import { AuthDTO } from "../../../entities/user/api/types";
+import { z } from "zod";
+import { authApi, AuthApiKeys } from "../api/auth-api";
 
 const formSchema = z.object({
   login: z.string().min(2, "Username must be at least 2 characters"),
@@ -16,9 +16,9 @@ const formSchema = z.object({
 
 export type FormData = z.infer<typeof formSchema>;
 
-type AuthApiFunction = (data: FormData) => Promise<AuthDTO>;
+// type AuthApiFunction = (data: FormData) => Promise<AuthDTO>;
 
-export function useAuthForm(authApi: AuthApiFunction) {
+export function useAuthUser(authFn: AuthApiKeys) {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -29,7 +29,7 @@ export function useAuthForm(authApi: AuthApiFunction) {
 
   async function authHandler(data: FormData) {
     toast("Вы авторизовались");
-    const resp = await authApi(data);
+    const resp = await authApi[authFn](data);
     console.log(resp);
   }
 

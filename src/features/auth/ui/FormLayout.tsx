@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { Eye, EyeOff } from "lucide-react"; // Импортируйте иконки глаза
 import { Toaster } from "sonner";
-
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { useForm } from "react-hook-form";
-// import { z } from "zod";
+import { FormData } from "@/entities/user";
 
 import {
   Form,
@@ -17,9 +14,6 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { FormData } from "../model/useAuthForm";
-// import { toast, Toaster } from "sonner";
-// import { authApi } from "../api/auth-api";
 
 interface FormLayoutProps {
   form: UseFormReturn<
@@ -27,6 +21,7 @@ interface FormLayoutProps {
       login: string;
       password: string;
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any,
     undefined
   >;

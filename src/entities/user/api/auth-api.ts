@@ -1,5 +1,5 @@
 import { api } from "@/shared/api/axios-instance";
-import { FormData } from "../../../features/auth/model/useAuthForm";
+import { FormData } from "../model/useAuthUser";
 
 export interface AuthDTO {
   user: {
@@ -14,6 +14,8 @@ interface AuthApi {
   signup: (data: FormData) => Promise<AuthDTO>;
   logout: () => Promise<void>;
 }
+
+export type AuthApiKeys = keyof typeof authApi;
 
 export const authApi: AuthApi = {
   signin: (data) => api.post("/auth/signin", data),

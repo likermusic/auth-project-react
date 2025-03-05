@@ -1,9 +1,8 @@
 import { FormLayout } from "./FormLayout";
-import { useAuthForm } from "../model/useAuthForm";
-import { authApi } from "../../../entities/user/api/auth-api";
+import { useAuthUser } from "@/entities/user";
 
 export function SignInForm() {
-  const { form, authHandler } = useAuthForm(authApi.signin);
+  const { form, authHandler } = useAuthUser("signin");
 
   return <FormLayout onSubmit={authHandler} form={form} />;
 }
