@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { AuthDTO } from "../api/types";
+import { AuthDTO } from "../../../entities/user/api/types";
 
 const formSchema = z.object({
   login: z.string().min(2, "Username must be at least 2 characters"),

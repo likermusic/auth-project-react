@@ -1,6 +1,13 @@
 import { api } from "@/shared/api/axios-instance";
-import { FormData } from "../model/useAuthForm";
-import { AuthDTO } from "./types";
+import { FormData } from "../../../features/auth/model/useAuthForm";
+
+export interface AuthDTO {
+  user: {
+    id: string;
+    login: string;
+  };
+  token: string;
+}
 
 interface AuthApi {
   signin: (data: FormData) => Promise<AuthDTO>;

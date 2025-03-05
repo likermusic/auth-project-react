@@ -1,6 +1,6 @@
 import { FormLayout } from "./FormLayout";
 import { useAuthForm } from "../model/useAuthForm";
-import { authApi } from "../api/auth-api";
+import { authApi } from "../../../entities/user/api/auth-api";
 
 export function SignInForm() {
   const { form, authHandler } = useAuthForm(authApi.signin);

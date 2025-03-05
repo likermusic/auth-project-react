@@ -16,7 +16,7 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 import { toast, Toaster } from "sonner";
-import { authApi } from "../api/auth-api";
+import { authApi } from "../../../entities/user/api/auth-api";
 
 const formSchema = z.object({
   login: z.string().min(2, "Username must be at least 2 characters"),
