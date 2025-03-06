@@ -35,9 +35,7 @@ export function useSignUpUser() {
     } catch (error) {
       // console.log((error as AxiosError).response?.data);
 
-      console.log(
-        (error as AxiosError<{ error: string }>).response?.data?.error
-      );
+      console.log((error as AxiosError<{ error: string }>).response?.data);
 
       // console.log(error.response.data.error);
 

@@ -22,12 +22,13 @@ export function useSignInUser() {
       const resp = await authApi.signin(data);
       // const currentDate = new Date();
       // const expiresInHours = new Date(currentDate.getTime() + 60 * 60 * 1000);
-      void (
-        resp?.data?.token &&
-        Cookies.default.set("token", resp.data.token, {
-          expires: 1 / 24, // по дефолту в днях. Чтобы задать 1ч = 1/24
-        })
-      );
+
+      if (!resp?.data?.token) {
+        throw new Error("Сервер не вернул токен");
+      }
+      Cookies.default.set("token", resp.data.token, {
+        expires: 1 / 24, // по дефолту в днях. Чтобы задать 1ч = 1/24
+      });
       toast.success("Вы авторизовались");
 
       navigate("/");
