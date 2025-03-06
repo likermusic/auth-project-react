@@ -1,5 +1,6 @@
 import { api } from "@/shared/api/axios-instance";
-import { FormData } from "../model/useAuthUser";
+// import { FormData } from "../model/useAuthUser";
+import { z } from "zod";
 
 export interface AuthDTO {
   data: {
@@ -10,6 +11,18 @@ export interface AuthDTO {
     token: string;
   };
 }
+
+export const formSchema = z.object({
+  login: z.string().min(2, "Username must be at least 2 characters"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(20, "Password is too long")
+    .regex(/[A-Z]/, "Пароль должен содержать хотя бы одну заглавную букву")
+    .regex(/[0-9]/, "Пароль должен содержать хотя бы одну цифру"),
+});
+
+export type FormData = z.infer<typeof formSchema>;
 
 interface AuthApi {
   signin: (data: FormData) => Promise<AuthDTO>;

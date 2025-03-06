@@ -1,8 +1,8 @@
 import { FormLayout } from "./FormLayout";
-import { useAuthUser } from "@/entities/user";
+import { useSignInUser } from "../model/useSignInUser";
 
 export function SignInForm() {
-  const { form, authHandler } = useAuthUser("signin");
+  const { signInHandler, form } = useSignInUser();
 
-  return <FormLayout onSubmit={authHandler} form={form} />;
+  return <FormLayout onSubmit={signInHandler} form={form} />;
 }

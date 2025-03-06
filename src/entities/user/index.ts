@@ -1,2 +1,3 @@
-export { useAuthUser } from "./model/useAuthUser";
-export type { FormData } from "./model/useAuthUser";
+export type { FormData } from "./api/auth-api";
+export { formSchema } from "./api/auth-api";
+export { authApi } from "./api/auth-api";
