@@ -2,11 +2,13 @@ import { api } from "@/shared/api/axios-instance";
 import { FormData } from "../model/useAuthUser";
 
 export interface AuthDTO {
-  user: {
-    id: string;
-    login: string;
+  data: {
+    user: {
+      id: string;
+      login: string;
+    };
+    token: string;
   };
-  token: string;
 }
 
 interface AuthApi {
