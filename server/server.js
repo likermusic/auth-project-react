@@ -100,4 +100,32 @@ app.post("/api/auth/signin", async (req, resp) => {
   }
 });
 
+// Проверка токена
+export const authenticateToken = (req, res, next) => {
+  console.log("START");
+
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    console.log("Токен отсутствует");
+    return res.status(401).json({ error: "Токен отсутствует" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      console.log("Недействительный токен");
+
+      return res.status(403).json({ error: "Недействительный токен" });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+app.get("/api/protected", authenticateToken, (req, res) => {
+  console.log("Это защищённый маршрут");
+  res.json({ message: "Доступ разрешен", user: req.user });
+});
+
 app.listen(4000, () => console.log("Сервер запущен на порту 4000"));

@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 
-import * as Cookies from "js-cookie";
+import Cookies from "js-cookie";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { authApi, FormData, formSchema } from "@/entities/user";
@@ -25,7 +25,7 @@ export function useSignUpUser() {
 
       void (
         resp?.data?.token &&
-        Cookies.default.set("token", resp.data.token, {
+        Cookies.set("token", resp.data.token, {
           expires: 1 / 24, // по дефолту в днях. Чтобы задать 1ч = 1/24
         })
       );
