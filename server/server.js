@@ -5,9 +5,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 
+import cookieParser from "cookie-parser"; // Импортируем cookie-parser
+
 const app = express();
 const prisma = new PrismaClient();
 app.use(express.json());
+app.use(cookieParser()); // Подключаем middleware для работы с куками
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 // const JWT_SECRET = "your_secret_key"; // JWT_SECRET нельзя хардкодить в коде! Он должен храниться в .env.
@@ -51,14 +54,24 @@ app.post("/api/auth/signup", async (req, resp) => {
     });
 
     // 4. Генерируем JWT-токен
-    const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { userId: newUser.id, login: user.login },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
 
-    // 5. Отправляем токен клиенту
+    // Отправляем токен в httpOnly Secure куки
     resp
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true, // Отключите в dev-режиме, если используете HTTP
+        sameSite: "strict",
+        maxAge: 60 * 60 * 1000, // 1 час
+      })
       .status(201)
-      .json({ token, user: { id: newUser.id, login: newUser.login } });
+      .json({ message: "Регистрация успешна" });
   } catch (error) {
     console.error(error);
     resp.status(500).json({ error: "Ошибка сервера" });
@@ -87,12 +100,24 @@ app.post("/api/auth/signin", async (req, resp) => {
       }
 
       // 3. Генерируем JWT-токен
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "1h", // 7d
-      });
+      const token = jwt.sign(
+        { userId: user.id, login: user.login },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1h", // 7d
+        }
+      );
 
-      // 4. Отправляем токен клиенту
-      resp.json({ token, user: { id: user.id, login: user.login } });
+      // 4. токен
+      resp
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict",
+          maxAge: 60 * 60 * 1000, // 1 час
+        })
+        .status(201)
+        .json({ message: "Вы успешно авторизованы" });
     } catch (error) {
       console.error(error);
       resp.status(500).json({ error: "Ошибка сервера" });
@@ -100,32 +125,41 @@ app.post("/api/auth/signin", async (req, resp) => {
   }
 });
 
-// Проверка токена
-export const authenticateToken = (req, res, next) => {
-  console.log("START");
+// * Выход из системы *
+app.post("/api/auth/logout", (req, resp) => {
+  resp
+    .clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    })
+    .json({ message: "Вы успешно вышли" });
+});
 
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+// * Проверка аутентификации *
+app.get("/api/protected", async (req, resp) => {
+  const token = req.cookies.token;
+  console.log(token);
 
   if (!token) {
-    console.log("Токен отсутствует");
-    return res.status(401).json({ error: "Токен отсутствует" });
+    return resp.status(401).json({ error: "Не авторизован" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      console.log("Недействительный токен");
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, login: true },
+    });
 
-      return res.status(403).json({ error: "Недействительный токен" });
+    if (!user) {
+      return resp.status(401).json({ error: "Пользователь не найден" });
     }
-    req.user = user;
-    next();
-  });
-};
 
-app.get("/api/protected", authenticateToken, (req, res) => {
-  console.log("Это защищённый маршрут");
-  res.json({ message: "Доступ разрешен", user: req.user });
+    resp.json(user);
+  } catch (error) {
+    resp.status(401).json({ error: "Токен недействителен" });
+  }
 });
 
 app.listen(4000, () => console.log("Сервер запущен на порту 4000"));
