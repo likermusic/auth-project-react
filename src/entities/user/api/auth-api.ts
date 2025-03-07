@@ -2,20 +2,20 @@ import { api } from "@/shared/api/axios-instance";
 // import { FormData } from "../model/useAuthUser";
 import { z } from "zod";
 
-interface UserDTO {
+export interface User {
   id: string;
   login: string;
 }
 
 export interface AuthDTO {
   data: {
-    user: UserDTO;
+    user: User;
     token: string;
   };
 }
 
 interface UserSessionDTO {
-  data: UserDTO;
+  data: User;
 }
 
 export const formSchema = z.object({

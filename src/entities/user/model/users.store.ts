@@ -36,11 +36,11 @@ export const useUserStore = create<UserState>((set) => ({
     try {
       set({ error: false });
       set({ loading: true });
-      await new Promise<void>((res) =>
-        setTimeout(() => {
-          res();
-        }, 4000)
-      );
+      // await new Promise<void>((res) =>
+      //   setTimeout(() => {
+      //     res();
+      //   }, 4000)
+      // );
       const resp = await authApi.session();
       void (resp?.data && set({ user: resp.data }));
     } catch {

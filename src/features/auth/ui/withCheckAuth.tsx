@@ -9,6 +9,7 @@ export function withCheckAuth<T>(Component: (props: T) => ReactElement) {
 
     const error = useUserStore((state) => state.error);
     const loading = useUserStore((state) => state.loading);
+    const user = useUserStore((state) => state.user);
 
     const getUserSession = useUserStore((state) => state.getUserSession);
 
@@ -26,6 +27,6 @@ export function withCheckAuth<T>(Component: (props: T) => ReactElement) {
           <Spinner size={"large"} className="text-black" />
         </div>
       );
-    return <Component {...props} />;
+    return <Component {...props} profile={user} />;
   };
 }

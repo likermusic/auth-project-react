@@ -6,13 +6,13 @@ import {
 import { ROUTES } from "@/shared/constants/routes";
 import { Home } from "@/pages/home";
 import { SignIn } from "@/pages/sign-in";
-import { ProtectedRootLayout as RootLayout } from "@/shared/ui/layouts/RootLayout";
+import { ProtectedAppLayout as AppLayout } from "@/app/ApptLayout";
 import { SignUp } from "@/pages/sign-up";
 
 const router = createBrowserRouter([
   {
     path: ROUTES.HOME,
-    element: <RootLayout />,
+    element: <AppLayout />,
     children: [
       {
         path: "",
