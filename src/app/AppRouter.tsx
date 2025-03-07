@@ -4,9 +4,9 @@ import {
   redirect,
 } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
-import { ProtectedHome as Home } from "@/pages/home";
+import { Home } from "@/pages/home";
 import { SignIn } from "@/pages/sign-in";
-import { RootLayout } from "@/shared/ui/layouts/RootLayout";
+import { ProtectedRootLayout as RootLayout } from "@/shared/ui/layouts/RootLayout";
 import { SignUp } from "@/pages/sign-up";
 
 const router = createBrowserRouter([

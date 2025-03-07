@@ -1,26 +1,52 @@
 import { create } from "zustand";
+import { authApi } from "../api/auth-api";
 
 interface UserData {
   id: string | null;
   login: string | null;
 }
-interface UserState extends UserData {
+interface UserState {
+  user: UserData;
+  error: boolean;
+  loading: boolean;
   setUser: (user: UserData) => void;
   clearUser: () => void;
+  getUserSession: () => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
-  id: null,
-  login: null,
+  user: {
+    id: null,
+    login: null,
+  },
+  error: false,
+  loading: true,
   setUser: (user) => {
     if (user?.id !== null && user?.login !== null) {
       localStorage.setItem("user", JSON.stringify(user));
-      set({ id: user.id, login: user.login });
+      set({ user });
     }
     // set({ id: user?.id ?? null, login: user?.login ?? null });
   },
   clearUser: () => {
     localStorage.removeItem("user");
-    set({ id: null, login: null });
+    set({ user: { id: null, login: null } });
+  },
+  getUserSession: async () => {
+    try {
+      set({ error: false });
+      set({ loading: true });
+      await new Promise<void>((res) =>
+        setTimeout(() => {
+          res();
+        }, 4000)
+      );
+      const resp = await authApi.session();
+      void (resp?.data && set({ user: resp.data }));
+    } catch {
+      set({ error: true });
+    } finally {
+      set({ loading: false });
+    }
   },
 }));
