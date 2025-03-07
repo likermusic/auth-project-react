@@ -135,19 +135,6 @@ export default tseslint.config(
                 "Shared module must not import upper layers (${dependency.type})",
             },
             {
-              from: ["shared"],
-              disallow: [
-                [
-                  "shared",
-                  {
-                    segment: "!${segment}",
-                  },
-                ],
-              ],
-              message:
-                "Shared module must not import other shared modules (${dependency.segment})",
-            },
-            {
               from: ["entities"],
               message:
                 "Entity must not import upper layers (${dependency.type})",

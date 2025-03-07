@@ -13,8 +13,13 @@ export function Home() {
     //   return config;
     // });
 
+    // api
+    //   .get("/protected")
+    //   .then((resp) => console.log(resp))
+    //   .catch((error) => console.log("Ошибка:", error));
+
     api
-      .get("/protected")
+      .get("/session")
       .then((resp) => console.log(resp))
       .catch((error) => console.log("Ошибка:", error));
   }

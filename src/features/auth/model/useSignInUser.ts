@@ -23,15 +23,10 @@ export function useSignInUser() {
       // const currentDate = new Date();
       // const expiresInHours = new Date(currentDate.getTime() + 60 * 60 * 1000);
 
-      if (!resp?.data?.token) {
-        throw new Error("Сервер не вернул токен");
+      if (resp) {
+        toast.success("Вы авторизовались");
+        navigate("/");
       }
-      Cookies.set("token", resp.data.token, {
-        expires: 1 / 24, // по дефолту в днях. Чтобы задать 1ч = 1/24
-      });
-      toast.success("Вы авторизовались");
-
-      navigate("/");
     } catch (error) {
       // console.log((error as AxiosError).response?.data);
 

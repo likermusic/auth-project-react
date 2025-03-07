@@ -162,4 +162,20 @@ app.get("/api/protected", async (req, resp) => {
   }
 });
 
+app.get("/api/session", async (req, resp) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return resp.status(401).json({ error: "Не авторизован" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = { id: decoded.userId, login: decoded.login };
+    resp.json(user);
+  } catch (error) {
+    resp.status(401).json({ error: "Токен недействителен" });
+  }
+});
+
 app.listen(4000, () => console.log("Сервер запущен на порту 4000"));
