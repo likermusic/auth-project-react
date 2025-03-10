@@ -126,7 +126,7 @@ app.post("/api/auth/signin", async (req, resp) => {
 });
 
 // * Выход из системы *
-app.post("/api/auth/logout", (req, resp) => {
+app.post("/api/auth/signout", (req, resp) => {
   resp
     .clearCookie("token", {
       httpOnly: true,
@@ -134,32 +134,6 @@ app.post("/api/auth/logout", (req, resp) => {
       sameSite: "strict",
     })
     .json({ message: "Вы успешно вышли" });
-});
-
-// * Проверка аутентификации *
-app.get("/api/protected", async (req, resp) => {
-  const token = req.cookies.token;
-  console.log(token);
-
-  if (!token) {
-    return resp.status(401).json({ error: "Не авторизован" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { id: true, login: true },
-    });
-
-    if (!user) {
-      return resp.status(401).json({ error: "Пользователь не найден" });
-    }
-
-    resp.json(user);
-  } catch (error) {
-    resp.status(401).json({ error: "Токен недействителен" });
-  }
 });
 
 app.get("/api/session", async (req, resp) => {

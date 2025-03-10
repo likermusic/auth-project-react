@@ -1,4 +1,5 @@
 import { api } from "@/shared/api/axios-instance";
+import { AxiosResponse } from "axios";
 // import { FormData } from "../model/useAuthUser";
 import { z } from "zod";
 
@@ -33,7 +34,7 @@ export type FormData = z.infer<typeof formSchema>;
 interface AuthApi {
   signin: (data: FormData) => Promise<AuthDTO>;
   signup: (data: FormData) => Promise<AuthDTO>;
-  logout: () => Promise<void>;
+  signout: () => Promise<AxiosResponse>;
   session: () => Promise<UserSessionDTO>;
 }
 
@@ -42,6 +43,6 @@ export type AuthApiKeys = keyof typeof authApi;
 export const authApi: AuthApi = {
   signin: (data) => api.post("/auth/signin", data),
   signup: (data) => api.post("/auth/signup", data),
-  logout: () => api.post("/auth/logout"),
+  signout: () => api.post("/auth/signout"),
   session: () => api.get("/session"),
 };

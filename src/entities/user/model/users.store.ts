@@ -1,16 +1,20 @@
 import { create } from "zustand";
 import { authApi } from "../api/auth-api";
+import { useNavigate } from "react-router-dom";
 
-interface UserData {
+interface IUser {
   id: string | null;
   login: string | null;
 }
+
 interface UserState {
-  user: UserData;
+  user: IUser;
   error: boolean;
   loading: boolean;
-  setUser: (user: UserData) => void;
-  clearUser: () => void;
+  signoutError: boolean;
+  signoutLoading: boolean;
+  // setUser: (user: IUser) => void;
+  signout: () => Promise<boolean>;
   getUserSession: () => void;
 }
 
@@ -20,18 +24,32 @@ export const useUserStore = create<UserState>((set) => ({
     login: null,
   },
   error: false,
-  loading: true,
-  setUser: (user) => {
-    if (user?.id !== null && user?.login !== null) {
-      localStorage.setItem("user", JSON.stringify(user));
-      set({ user });
+  loading: false,
+
+  signoutError: false,
+  signoutLoading: false,
+
+  // setUser: (user) => {
+  //   if (user?.id !== null && user?.login !== null) {
+  //     set({ user });
+  //   }
+  //   // set({ id: user?.id ?? null, login: user?.login ?? null });
+  // },
+
+  signout: async () => {
+    try {
+      set({ signoutError: false, signoutLoading: true });
+      await authApi.signout();
+      set({ user: { id: null, login: null } });
+      return true;
+    } catch {
+      set({ signoutError: true });
+      return false;
+    } finally {
+      set({ signoutLoading: false });
     }
-    // set({ id: user?.id ?? null, login: user?.login ?? null });
   },
-  clearUser: () => {
-    localStorage.removeItem("user");
-    set({ user: { id: null, login: null } });
-  },
+
   getUserSession: async () => {
     try {
       set({ error: false });
@@ -41,6 +59,7 @@ export const useUserStore = create<UserState>((set) => ({
       //     res();
       //   }, 4000)
       // );
+
       const resp = await authApi.session();
       void (resp?.data && set({ user: resp.data }));
     } catch {
