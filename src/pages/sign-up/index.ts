@@ -1,1 +1,1 @@
-export { SignUp } from "./ui/SignUp";
+export { ProtectedSignUp } from "./ui/SignUp";

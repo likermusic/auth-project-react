@@ -1,1 +1,1 @@
-export { SignIn } from "./ui/SignIn";
+export { ProtectedSignIn } from "./ui/SignIn";

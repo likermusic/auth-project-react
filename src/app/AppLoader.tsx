@@ -2,7 +2,7 @@ import { useUserStore } from "@/entities/user";
 import { ROUTES } from "@/shared/constants/routes";
 import { Spinner } from "@/shared/ui/spinner";
 import { ReactNode, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 
 export function AppLoader({ children }: { children?: ReactNode }) {
   const getUserSession = useUserStore((state) => state.getUserSession);
@@ -20,6 +20,7 @@ export function AppLoader({ children }: { children?: ReactNode }) {
       }
     })();
   }, [getUserSession, navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center align-center">

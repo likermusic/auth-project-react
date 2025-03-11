@@ -1,9 +1,9 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
 import { Home } from "@/pages/home";
-import { SignIn } from "@/pages/sign-in";
+import { ProtectedSignIn as SignIn } from "@/pages/sign-in";
 import { AppLayout } from "@/app/ApptLayout";
-import { SignUp } from "@/pages/sign-up";
+import { ProtectedSignUp as SignUp } from "@/pages/sign-up";
 import { AppLoader } from "./AppLoader";
 
 const router = createBrowserRouter([
