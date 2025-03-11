@@ -1,9 +1,8 @@
 import { create } from "zustand";
-import { authApi } from "../api/auth-api";
-import { useNavigate } from "react-router-dom";
+import { authApi, FormData } from "../api/auth-api";
 
 interface IUser {
-  id: string | null;
+  id: number | null;
   login: string | null;
 }
 
@@ -13,8 +12,14 @@ interface UserState {
   loading: boolean;
   signoutError: boolean;
   signoutLoading: boolean;
+  signinError: boolean;
+  signinLoading: boolean;
+  signupError: boolean;
+  signupLoading: boolean;
   // setUser: (user: IUser) => void;
   signout: () => Promise<boolean>;
+  signin: (data: FormData) => Promise<boolean>;
+  signup: (data: FormData) => Promise<boolean>;
   getUserSession: () => void;
 }
 
@@ -29,13 +34,43 @@ export const useUserStore = create<UserState>((set) => ({
   signoutError: false,
   signoutLoading: false,
 
+  signinError: false,
+  signinLoading: false,
+
+  signupError: false,
+  signupLoading: false,
   // setUser: (user) => {
   //   if (user?.id !== null && user?.login !== null) {
   //     set({ user });
   //   }
   //   // set({ id: user?.id ?? null, login: user?.login ?? null });
   // },
-
+  signup: async (data: FormData) => {
+    try {
+      set({ signupError: false, signupLoading: true });
+      const resp = await authApi.signup(data);
+      set({ user: { id: resp.data.id, login: resp.data.login } });
+      return true;
+    } catch {
+      set({ signupError: true });
+      return false;
+    } finally {
+      set({ signupLoading: false });
+    }
+  },
+  signin: async (data: FormData) => {
+    try {
+      set({ signinError: false, signinLoading: true });
+      const resp = await authApi.signin(data);
+      set({ user: { id: resp.data.id, login: resp.data.login } });
+      return true;
+    } catch {
+      set({ signinError: true });
+      return false;
+    } finally {
+      set({ signinLoading: false });
+    }
+  },
   signout: async () => {
     try {
       set({ signoutError: false, signoutLoading: true });

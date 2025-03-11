@@ -1,40 +1,17 @@
-import { authApi, useUserStore } from "@/entities/user";
+import { useUserStore } from "@/entities/user";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function useSignOutUser() {
-  const signout = useUserStore(state => state.signout);
-  const loading = useUserStore(state => state.loading);
-  const error = useUserStore(state => state.error);
+  const signout = useUserStore((state) => state.signout);
+  const loading = useUserStore((state) => state.signoutLoading);
+  // const error = useUserStore((state) => state.signoutError);
+  const navigate = useNavigate();
 
-  async function signOutHandler() {
-    try {
-      const resp = await authApi.signout();
-      if (resp?.statusText === "OK") {
-        console.log("sds");
-      }
-      resp.statusText === "OK" ? 
-      // void (
-      //   resp?.data?.token &&
-      //   Cookies.set("token", resp.data.token, {
-      //     expires: 1 / 24, // по дефолту в днях. Чтобы задать 1ч = 1/24
-      //   })
-      // );
-      // toast.success("Вы зарегистрированы");
-
-      // navigate("/");
-    } catch (error) {
-      // console.log((error as AxiosError).response?.data);
-
-      console.log((error as AxiosError<{ error: string }>).response?.data);
-
-      // console.log(error.response.data.error);
-
-      // console.log((error as Error).message);
-      toast.error(
-        (error as AxiosError<{ error: string }>).response?.data?.error ||
-          "Ошибка регистрации. Проверьте логин и пароль."
-      );
-    }
+  async function signoutHandler() {
+    const resp = await signout();
+    void (resp ? navigate("/signin") : toast.error("Ошибка"));
   }
 
-  return { signOutHandler };
+  return { loading, signoutHandler };
 }

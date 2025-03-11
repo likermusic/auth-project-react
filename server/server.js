@@ -71,7 +71,7 @@ app.post("/api/auth/signup", async (req, resp) => {
         maxAge: 60 * 60 * 1000, // 1 час
       })
       .status(201)
-      .json({ message: "Регистрация успешна" });
+      .json({ id: user.id, login: user.login, message: "Регистрация успешна" });
   } catch (error) {
     console.error(error);
     resp.status(500).json({ error: "Ошибка сервера" });
@@ -117,7 +117,11 @@ app.post("/api/auth/signin", async (req, resp) => {
           maxAge: 60 * 60 * 1000, // 1 час
         })
         .status(201)
-        .json({ message: "Вы успешно авторизованы" });
+        .json({
+          id: user.id,
+          login: user.login,
+          message: "Вы успешно авторизованы",
+        });
     } catch (error) {
       console.error(error);
       resp.status(500).json({ error: "Ошибка сервера" });

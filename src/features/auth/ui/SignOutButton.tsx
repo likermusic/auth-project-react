@@ -1,19 +1,8 @@
-import { useUserStore } from "@/entities/user";
 import { Button } from "@/shared/ui/button";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useSignOutUser } from "../model/useSignOutUser";
 
 export function SignOutButton() {
-  const signout = useUserStore((state) => state.signout);
-  const loading = useUserStore((state) => state.signoutLoading);
-  // const error = useUserStore((state) => state.signoutError);
-  const navigate = useNavigate();
-
-  async function signoutHandler() {
-    const resp = await signout();
-    void (resp ? navigate("/signin") : toast.error("Ошибка"));
-  }
-
+  const { loading, signoutHandler } = useSignOutUser();
   return (
     <>
       <Button
