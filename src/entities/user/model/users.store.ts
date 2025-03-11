@@ -8,8 +8,8 @@ interface IUser {
 
 interface UserState {
   user: IUser;
-  error: boolean;
-  loading: boolean;
+  sessionError: boolean;
+  sessionLoading: boolean;
   signoutError: boolean;
   signoutLoading: boolean;
   signinError: boolean;
@@ -28,8 +28,9 @@ export const useUserStore = create<UserState>((set) => ({
     id: null,
     login: null,
   },
-  error: false,
-  loading: false,
+  sessionError: false,
+  //изначально ставим true а то будет моргание главной стр когда юзер не авторизован
+  sessionLoading: true,
 
   signoutError: false,
   signoutLoading: false,
@@ -39,12 +40,7 @@ export const useUserStore = create<UserState>((set) => ({
 
   signupError: false,
   signupLoading: false,
-  // setUser: (user) => {
-  //   if (user?.id !== null && user?.login !== null) {
-  //     set({ user });
-  //   }
-  //   // set({ id: user?.id ?? null, login: user?.login ?? null });
-  // },
+
   signup: async (data: FormData) => {
     try {
       set({ signupError: false, signupLoading: true });
@@ -87,8 +83,7 @@ export const useUserStore = create<UserState>((set) => ({
 
   getUserSession: async () => {
     try {
-      set({ error: false });
-      set({ loading: true });
+      set({ sessionError: false, sessionLoading: true });
       // await new Promise<void>((res) =>
       //   setTimeout(() => {
       //     res();
@@ -98,9 +93,9 @@ export const useUserStore = create<UserState>((set) => ({
       const resp = await authApi.session();
       void (resp?.data && set({ user: resp.data }));
     } catch {
-      set({ error: true });
+      set({ sessionError: true });
     } finally {
-      set({ loading: false });
+      set({ sessionLoading: false });
     }
   },
 }));

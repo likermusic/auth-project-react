@@ -1,6 +1,5 @@
 import { useUserStore } from "@/entities/user";
 import { SignOutButton } from "@/features/auth";
-import { api } from "@/shared/api/axios-instance";
 
 export function Profile() {
   const profile = useUserStore((state) => state.user);

@@ -7,25 +7,30 @@ export function withCheckAuth<T>(Component: (props: T) => ReactElement) {
   return function (props: PropsWithChildren<T>) {
     const navigate = useNavigate();
 
-    const error = useUserStore((state) => state.error);
-    const loading = useUserStore((state) => state.loading);
+    const error = useUserStore((state) => state.sessionError);
+    const loading = useUserStore((state) => state.sessionLoading);
 
     const getUserSession = useUserStore((state) => state.getUserSession);
 
     useEffect(() => {
       getUserSession();
-    }, []);
+    }, [getUserSession]);
 
-    if (error) {
-      navigate("/signin");
-      return null;
-    }
+    useEffect(() => {
+      if (error) {
+        navigate("/signin");
+      }
+    }, [error, navigate]);
+
     if (loading)
       return (
         <div className="min-h-screen flex justify-center align-center">
           <Spinner size={"large"} className="text-black" />
         </div>
       );
+    if (error) {
+      return null;
+    }
     return <Component {...props} />;
   };
 }

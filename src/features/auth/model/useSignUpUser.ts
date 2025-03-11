@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { FormData, formSchema, useUserStore } from "@/entities/user";
 
