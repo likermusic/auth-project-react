@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 // import { NavLinks } from "./nav-links";
 // import { Profile } from "./profile";
 
-function AppLayout() {
+export function AppLayout() {
   return (
     <div className="flex flex-col">
       <Header />
@@ -18,5 +18,5 @@ function AppLayout() {
   );
 }
 
-const ProtectedAppLayout = withCheckAuth(AppLayout);
-export { ProtectedAppLayout };
+// const ProtectedAppLayout = withCheckAuth(AppLayout);
+// export { ProtectedAppLayout };

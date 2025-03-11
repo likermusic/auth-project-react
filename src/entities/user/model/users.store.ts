@@ -20,10 +20,10 @@ interface UserState {
   signout: () => Promise<boolean>;
   signin: (data: FormData) => Promise<boolean>;
   signup: (data: FormData) => Promise<boolean>;
-  getUserSession: () => void;
+  getUserSession: () => Promise<boolean>;
 }
 
-export const useUserStore = create<UserState>((set) => ({
+export const useUserStore = create<UserState>((set, get) => ({
   user: {
     id: null,
     login: null,
@@ -89,11 +89,18 @@ export const useUserStore = create<UserState>((set) => ({
       //     res();
       //   }, 4000)
       // );
-
+      // Не надо получать юзера если он уже в сторе есть
+      if (get().user.id && get().user.login) return true;
       const resp = await authApi.session();
-      void (resp?.data && set({ user: resp.data }));
+      if (resp?.data) {
+        set({ user: resp.data });
+        return true;
+      } else {
+        throw new Error();
+      }
     } catch {
       set({ sessionError: true });
+      return false;
     } finally {
       set({ sessionLoading: false });
     }

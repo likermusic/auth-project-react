@@ -1,18 +1,19 @@
-import {
-  RouterProvider,
-  createBrowserRouter,
-  redirect,
-} from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
 import { Home } from "@/pages/home";
 import { SignIn } from "@/pages/sign-in";
-import { ProtectedAppLayout as AppLayout } from "@/app/ApptLayout";
+import { AppLayout } from "@/app/ApptLayout";
 import { SignUp } from "@/pages/sign-up";
+import { AppLoader } from "./AppLoader";
 
 const router = createBrowserRouter([
   {
     path: ROUTES.HOME,
-    element: <AppLayout />,
+    element: (
+      <AppLoader>
+        <AppLayout />
+      </AppLoader>
+    ),
     children: [
       {
         path: "",
