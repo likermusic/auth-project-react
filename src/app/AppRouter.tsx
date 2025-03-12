@@ -1,8 +1,8 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ROUTES } from "@/shared/constants/routes";
 import { Home } from "@/pages/home";
-// import { ProtectedSignIn as SignIn } from "@/pages/sign-in";
-import { SignIn } from "@/pages/sign-in";
+import { ProtectedSignIn as SignIn } from "@/pages/sign-in";
+// import { SignIn } from "@/pages/sign-in";
 
 import { AppLayout } from "@/app/ApptLayout";
 import { ProtectedSignUp as SignUp } from "@/pages/sign-up";
