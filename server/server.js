@@ -264,8 +264,10 @@ app.post("/api/auth/refresh", async (req, resp) => {
   - Обновляет refresh-токен в базе данных.
   - Отправляет новые токены в куки.
 */
+
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) return resp.status(401).json({ error: "Не авторизован" });
+  // if (!refreshToken) return resp.status(400).json({ error: "Не авторизован" });
 
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
