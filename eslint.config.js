@@ -102,7 +102,7 @@ export default tseslint.config(
                   },
                 ],
               ],
-              allow: "index.ts",
+              allow: "*.(ts|tsx)",
             },
             {
               target: [

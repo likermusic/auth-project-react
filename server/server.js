@@ -258,6 +258,8 @@ app.get("/api/session", async (req, resp) => {
 
 // Обновление токена
 app.post("/api/auth/refresh", async (req, resp) => {
+  console.log("REFRESH");
+
   /*
   - Проверяет refresh-токен из куки.
   - Если токен валиден, генерирует новые access и refresh токены.
