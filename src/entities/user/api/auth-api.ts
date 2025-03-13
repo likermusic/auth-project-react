@@ -23,6 +23,7 @@ export type FormData = z.infer<typeof formSchema>;
 interface AuthApi {
   signin: (data: FormData) => Promise<AxiosResponse<UserDTO>>;
   signup: (data: FormData) => Promise<AxiosResponse<UserDTO>>;
+  google_auth: () => void;
   signout: () => Promise<AxiosResponse>;
   session: () => Promise<AxiosResponse<UserDTO>>;
 }
@@ -32,6 +33,9 @@ export type AuthApiKeys = keyof typeof authApi;
 export const authApi: AuthApi = {
   signin: (data) => api.post("/auth/signin", data),
   signup: (data) => api.post("/auth/signup", data),
+  google_auth: () => {
+    window.location.href = "http://localhost:4000/api/auth/google";
+  },
   signout: () => api.post("/auth/signout"),
   session: () => api.get("/session"),
 };

@@ -6,7 +6,6 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 
 import cookieParser from "cookie-parser"; // Импортируем cookie-parser
-// import { OAuth2Client } from "google-auth-library";
 
 import passport from "passport";
 import GoogleStrategy from "passport-google-oauth20";
@@ -16,8 +15,8 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use(cookieParser()); // Подключаем middleware для работы с куками
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-// const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-app.use(passport.initialize());
+
+app.use(passport.initialize()); // Инициализация Passport чтобы подключить ниже стратегии аутентификации
 
 // const JWT_SECRET = "your_secret_key"; // JWT_SECRET нельзя хардкодить в коде! Он должен храниться в .env.
 
@@ -48,23 +47,24 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:4000/api/auth/google/callback",
+      callbackURL: "http://localhost:4000/api/auth/google/callback", // URL-адрес, на который Google перенаправит пользователя после завершения аутентификации (это ниже метод есть) чтобы там сохранить токены
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log("Google profile:", profile);
+        console.log("Google profile:", profile); // Данные о юзере от Гугла
 
         // Проверяем, что profile.id существует
         if (!profile.id) {
           throw new Error("Google ID не получен");
         }
 
-        // Поиск пользователя по googleId
+        // Поиск пользователя по googleId в prisma
         let user = await prisma.user.findUnique({
           where: { googleId: profile.id },
         });
 
         if (!user) {
+          // Если в БД юзера не нашли то в итоге нужно создать такого юзера в БД
           // Проверяем, что email существует
           if (!profile.emails || !profile.emails[0]?.value) {
             throw new Error("Email не получен от Google");
@@ -76,12 +76,13 @@ passport.use(
           });
 
           if (existingUser) {
-            // Если пользователь с таким email уже есть, но без googleId,
+            // Если пользователь с таким email уже есть в БД, но без googleId,
             // можно либо связать аккаунты, либо вернуть ошибку
             throw new Error("Email уже используется другим аккаунтом");
           }
 
           user = await prisma.user.create({
+            // Перезаписываем перем user и кладем в нее созданного сейчас юзера
             data: {
               googleId: profile.id,
               login: profile.emails[0].value,
@@ -92,10 +93,10 @@ passport.use(
           });
         }
 
-        // Генерируем токены сразу в стратегии
+        // Генерируем токены авт-и. Сюда придет по-любому user или найденный сразу или созданный
         const tokens = generateTokens(user.id, user.login);
 
-        return done(null, { user, tokens });
+        return done(null, { user, tokens }); //done уведомляет Passport.js о результате аутентификации пользователя. 1й парам null - если нет ошибки, 2й -аутентифицир-й юзер
       } catch (error) {
         return done(error, null);
       }
@@ -105,10 +106,12 @@ passport.use(
 
 // Сериализация пользователя
 passport.serializeUser((user, done) => {
+  // определяет какую информацию о пользователе будет хранить сессия. В данном случае user.id. Вызывается в момент, когда пользователь успешно аутентифицируется
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
+  // для извлечения полной информации о пользователе. Вызывается каждый раз, когда запрашивается маршрут, защищенный аутентификацией когда нужно аутентифицир юзера
   try {
     const user = await prisma.user.findUnique({ where: { id } });
     done(null, user);
@@ -119,22 +122,24 @@ passport.deserializeUser(async (id, done) => {
 
 // Роуты Google авторизации
 app.get(
-  "/api/auth/google",
+  "/api/auth/google", // это роут который дергаем с фронта
   passport.authenticate("google", {
-    scope: ["profile", "email"],
-    session: false, // Отключаем сессии
+    // перенаправляет пользователя на страницу аутентификации Google
+    scope: ["profile", "email"], //какую информацию мы запрашиваем у Google
+    session: false, // Отключаем сессии, мы ее не исп
   })
 );
 
 app.get(
   "/api/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:5173",
+    //запускается когда юзер перенаправлен обратно из Google
+    failureRedirect: "http://localhost:5173", // куда редирект если фейл
     session: false,
   }),
   async (req, resp) => {
     try {
-      const { user, tokens } = req.user;
+      const { user, tokens } = req.user; // вытягиваются данные которые вернул гугл и сгенеренные нами токены
 
       // Сохранение refresh token в базе
       await prisma.refreshToken.upsert({
@@ -166,6 +171,7 @@ app.get(
           sameSite: "strict",
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })
+        .status(201)
         .redirect("http://localhost:5173");
     } catch (error) {
       console.error(error);
@@ -263,28 +269,6 @@ app.post("/api/auth/signup", async (req, resp) => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
-
-    // 4. Генерируем JWT-токен
-    // const token = jwt.sign(
-    //   { userId: newUser.id, login: user.login },
-    //   process.env.JWT_SECRET,
-    //   {
-    //     expiresIn: "1h",
-    //   }
-    // );
-
-    // Отправляем токен в httpOnly Secure куки
-    /*
-    resp
-      .cookie("token", token, {
-        httpOnly: true,
-        secure: true, // Отключите в dev-режиме, если используете HTTP
-        sameSite: "strict",
-        maxAge: 60 * 60 * 1000, // 1 час
-      })
-      .status(201)
-      .json({ id: user.id, login: user.login, message: "Регистрация успешна" });
-      */
 
     //Сохраняем оба токена в куки
     resp
