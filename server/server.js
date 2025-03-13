@@ -6,12 +6,18 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 
 import cookieParser from "cookie-parser"; // Импортируем cookie-parser
+// import { OAuth2Client } from "google-auth-library";
+
+import passport from "passport";
+import GoogleStrategy from "passport-google-oauth20";
 
 const app = express();
 const prisma = new PrismaClient();
 app.use(express.json());
 app.use(cookieParser()); // Подключаем middleware для работы с куками
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+// const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+app.use(passport.initialize());
 
 // const JWT_SECRET = "your_secret_key"; // JWT_SECRET нельзя хардкодить в коде! Он должен храниться в .env.
 
@@ -36,6 +42,185 @@ function generateTokens(userId, login) {
   return { accessToken, refreshToken };
 }
 
+// Настройка Google Strategy
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:4000/api/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        console.log("Google profile:", profile);
+
+        // Проверяем, что profile.id существует
+        if (!profile.id) {
+          throw new Error("Google ID не получен");
+        }
+
+        // Поиск пользователя по googleId
+        let user = await prisma.user.findUnique({
+          where: { googleId: profile.id },
+        });
+
+        if (!user) {
+          // Проверяем, что email существует
+          if (!profile.emails || !profile.emails[0]?.value) {
+            throw new Error("Email не получен от Google");
+          }
+
+          // Проверяем, не занят ли login другим пользователем
+          const existingUser = await prisma.user.findUnique({
+            where: { login: profile.emails[0].value },
+          });
+
+          if (existingUser) {
+            // Если пользователь с таким email уже есть, но без googleId,
+            // можно либо связать аккаунты, либо вернуть ошибку
+            throw new Error("Email уже используется другим аккаунтом");
+          }
+
+          user = await prisma.user.create({
+            data: {
+              googleId: profile.id,
+              login: profile.emails[0].value,
+              displayName:
+                profile.displayName || profile.emails[0].value.split("@")[0],
+              // password не нужен для Google auth
+            },
+          });
+        }
+
+        // Генерируем токены сразу в стратегии
+        const tokens = generateTokens(user.id, user.login);
+
+        return done(null, { user, tokens });
+      } catch (error) {
+        return done(error, null);
+      }
+    }
+  )
+);
+
+// Сериализация пользователя
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id } });
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+// Роуты Google авторизации
+app.get(
+  "/api/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false, // Отключаем сессии
+  })
+);
+
+app.get(
+  "/api/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "http://localhost:5173",
+    session: false,
+  }),
+  async (req, resp) => {
+    try {
+      const { user, tokens } = req.user;
+
+      // Сохранение refresh token в базе
+      await prisma.refreshToken.upsert({
+        where: { userId: user.id },
+        update: {
+          token: tokens.refreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+        create: {
+          token: tokens.refreshToken,
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      // Установка кук и отправка ответа
+      resp
+        .cookie("token", tokens.accessToken, {
+          httpOnly: true,
+          // secure: process.env.NODE_ENV === "production",
+          secure: true,
+          sameSite: "strict",
+          maxAge: 60 * 60 * 1000,
+        })
+        .cookie("refreshToken", tokens.refreshToken, {
+          httpOnly: true,
+          // secure: process.env.NODE_ENV === "production",
+          secure: true,
+          sameSite: "strict",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+        .redirect("http://localhost:5173");
+    } catch (error) {
+      console.error(error);
+      resp.status(500).json({ error: "Ошибка сервера" });
+    }
+  }
+);
+
+/*
+app.post("/api/auth/google", async (req, resp) => {
+  const token = req.cookies.token;
+  console.log(token);
+
+  return;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    console.log(ticket);
+
+    const { email, name, sub } = ticket.getPayload();
+
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: { login: name, email, googleId: sub },
+      });
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user.id, user.login);
+
+    // Сохраняем токены в куки
+    resp
+      .cookie("token", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 1000,
+      })
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({ id: user.id, login: user.login, message: "Авторизация успешна" });
+  } catch (error) {
+    console.error("Ошибка авторизации через Google:", error);
+    resp.status(401).json({ error: "Ошибка авторизации" });
+  }
+});
+*/
 app.post("/api/auth/signup", async (req, resp) => {
   const result = formSchema.safeParse(req.body);
   if (!result.success) {

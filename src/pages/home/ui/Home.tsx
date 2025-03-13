@@ -18,10 +18,13 @@ export function Home() {
     //   .then((resp) => console.log(resp))
     //   .catch((error) => console.log("Ошибка:", error));
 
-    api
-      .get("/session")
-      .then((resp) => console.log(resp))
-      .catch((error) => console.log("Ошибка:", error));
+    // api
+    //   .get("/session")
+    //   .then((resp) => console.log(resp))
+    //   .catch((error) => console.log("Ошибка:", error));
+
+    // api.post("/auth/google").then((resp) => console.log(resp));
+    window.location.href = "http://localhost:4000/api/auth/google";
   }
 
   return (

@@ -16,7 +16,9 @@ datasource db {
 model User {
   id            Int            @id @default(autoincrement())
   login         String         @unique
-  password      String
+  password      String?
+  googleId      String?        @unique
+  displayName   String?      
   createdAt     DateTime       @default(now())
   RefreshTokens RefreshToken[]
 }
