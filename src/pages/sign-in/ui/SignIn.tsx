@@ -3,7 +3,7 @@ import { withCheckAuth } from "@/features/auth/ui/withCheckAuth";
 import { AuthLayout } from "@/shared/ui/layouts/AuthLayout";
 
 function SignIn() {
-  return <AuthLayout title="Sign In" form={<SignInForm />} />;
+  return <AuthLayout title="Signin" form={<SignInForm />} />;
 }
 
 const ProtectedSignIn = withCheckAuth(SignIn);

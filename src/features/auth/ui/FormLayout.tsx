@@ -14,6 +14,7 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 import { UseFormReturn } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 interface FormLayoutProps {
   form: UseFormReturn<
@@ -26,9 +27,19 @@ interface FormLayoutProps {
     undefined
   >;
   onSubmit: (data: FormData) => Promise<void>;
+  link: {
+    to: string;
+    title: string;
+  };
+  buttonTitle: string;
 }
 
-export function FormLayout({ form, onSubmit }: FormLayoutProps) {
+export function FormLayout({
+  form,
+  onSubmit,
+  link,
+  buttonTitle,
+}: FormLayoutProps) {
   const [showPassword, setShowPassword] = useState(false); // Состояние для переключения видимости пароля
 
   return (
@@ -78,8 +89,11 @@ export function FormLayout({ form, onSubmit }: FormLayoutProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit">{buttonTitle}</Button>
       </form>
+      <Button variant={"link"}>
+        <Link to={link.to}>{link.title}</Link>
+      </Button>
     </Form>
   );
 }
