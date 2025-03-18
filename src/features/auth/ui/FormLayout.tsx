@@ -14,9 +14,8 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { GoogleAuthButton } from "@/shared/ui/google-auth-button/google-auth-button";
-import { api } from "@/shared/api/axios-instance";
 
 interface FormLayoutProps {
   form: UseFormReturn<
@@ -34,6 +33,7 @@ interface FormLayoutProps {
     title: string;
   };
   buttonTitle: string;
+  forgotPassword?: React.ReactElement;
 }
 
 export function FormLayout({
@@ -41,9 +41,9 @@ export function FormLayout({
   onSubmit,
   link,
   buttonTitle,
+  forgotPassword,
 }: FormLayoutProps) {
   const [showPassword, setShowPassword] = useState(false); // Состояние для переключения видимости пароля
-  const navigate = useNavigate();
 
   return (
     <Form {...form}>
@@ -98,6 +98,7 @@ export function FormLayout({
         </Button>
       </form>
       <GoogleAuthButton onClick={authApi.google_auth} />
+      {forgotPassword ?? ""}
     </Form>
   );
 }

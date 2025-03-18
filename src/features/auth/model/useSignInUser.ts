@@ -17,10 +17,13 @@ export function useSignInUser() {
   });
 
   async function signInHandler(data: FormData) {
-    const resp = await signin(data);
-    void (resp
-      ? navigate("/")
-      : toast.error("Ошибка авторизации. Проверьте логин и пароль"));
+    try {
+      await signin(data);
+      navigate("/");
+    } catch {
+      toast.error("Ошибка авторизации. Проверьте логин и пароль");
+    }
+
     // toast.success("Вы авторизовались");
   }
   return { signInHandler, form };

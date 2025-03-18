@@ -7,6 +7,8 @@ import { ProtectedSignIn as SignIn } from "@/pages/sign-in";
 import { AppLayout } from "@/app/ApptLayout";
 import { ProtectedSignUp as SignUp } from "@/pages/sign-up";
 import { AppLoader } from "./AppLoader";
+import { ResetPassword } from "@/pages/reset-password";
+import { ForgotPassword } from "@/pages/forgot-password";
 
 const router = createBrowserRouter([
   {
@@ -33,14 +35,14 @@ const router = createBrowserRouter([
     path: ROUTES.SIGNUP,
     element: <SignUp />,
   },
-  // {
-  //   path: ROUTES.BOARDS,
-  //   element: <BoardsPage />,
-  // },
-  // {
-  //   path: ROUTES.USERS,
-  //   element: <UsersPage />,
-  // },
+  {
+    path: ROUTES.RESET_PASSWORD,
+    element: <ResetPassword />,
+  },
+  {
+    path: ROUTES.FORGOT_PASSWORD,
+    element: <ForgotPassword />,
+  },
 ]);
 
 export function AppRouter() {

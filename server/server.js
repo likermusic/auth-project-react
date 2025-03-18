@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser"; // Импортируем cookie-parse
 
 import passport from "passport";
 import GoogleStrategy from "passport-google-oauth20";
+import nodemailer from "nodemailer";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -476,6 +477,114 @@ app.post("/api/auth/refresh", async (req, resp) => {
       .json({ message: "Токены обновлены" });
   } catch (error) {
     resp.status(403).json({ error: "Недействительный токен" });
+  }
+});
+
+// Функция для отправки писем
+export const sendEmail = async (to, subject, html) => {
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST, //В Настройка почты берем Имя сервера исходящей почты
+    port: 465, // В Настройка почты SMTP SSL/TLS порт
+    secure: true,
+    auth: {
+      // user: process.env.SMTP_USER,
+      user: process.env.SMTP_USER, //В Настройка почты отправитель
+      // pass: process.env.SMTP_PASS,
+      pass: process.env.SMTP_pass, //В Настройка почты
+    },
+    tls: {
+      rejectUnauthorized: false, // Отключает проверку сертификата
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"Support" <${process.env.SMTP_USER}>`, // адрес должен совпадать с user
+    to,
+    subject,
+    html,
+  });
+};
+
+// 1. Endpoint для запроса восстановления пароля
+app.post("/api/auth/forgot-password", async (req, resp) => {
+  //Здесь должна б вализация на Пароль
+
+  //const { login, email } = req.body; // вместо логинов будет почта и тогда сюда будет приходить только почта
+
+  const login = "user1";
+  const email = "drumliker@mail.ru";
+  const user = await prisma.user.findUnique({ where: { login } });
+
+  if (!user) return resp.status(404).json({ error: "Пользователь не найден" });
+
+  // const resetToken = crypto.randomBytes(32).toString("hex");
+  // const resetTokenHash = crypto
+  //   .createHash("sha256")
+  //   .update(resetToken)
+  //   .digest("hex");
+
+  // await prisma.user.update({
+  //   where: { login },
+  //   data: {
+  //     resetToken: resetTokenHash,
+  //     resetTokenExpires: new Date(Date.now() + 3600000),
+  //   },
+  // });
+
+  // const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}&email=${login}`;
+  const resetToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
+  const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+  await sendEmail(
+    email, // сюда подставится email юзера который он введет
+    "Восстановление пароля",
+    `<p>Перейдите по ссылке, чтобы сбросить пароль: <a href="${resetLink}">Сбросить пароль</a></p>`
+  );
+
+  resp
+    .cookie("resetToken", resetToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000,
+    })
+    .json({ message: "Ссылка для восстановления пароля отправлена" });
+});
+
+// 2. Endpoint для сброса пароля
+app.post("/api/auth/reset-password", async (req, resp) => {
+  const { newPassword } = req.body;
+  const token = req.cookies.resetToken;
+
+  if (!token) {
+    return resp.status(401).json({ error: "Токен не найден" });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    }); // нашли этого юзера в БД
+    if (!user) {
+      return resp.status(404).json({ error: "Пользователь не найден" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { password: hashedPassword },
+    });
+
+    //обнулить временный токен
+    resp
+      .clearCookie("resetToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      })
+      .json({ message: "Пароль успешно обновлен" });
+    //редирект на авторизацию
+  } catch (error) {
+    resp.status(400).json({ error: "Неверный или истёкший токен" });
   }
 });
 
